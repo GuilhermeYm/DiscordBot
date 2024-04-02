@@ -1,0 +1,24 @@
+{
+  "name": "discordbot",
+  "version": "1.0.0",
+  "description": "I will create a bot to Discord, but I don't know if I can finish it.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5",
+    "module-alias": "^2.2.3",
+    "nodemon": "^3.1.0"
+  },
+  "_moduleAliases" : { 
+    "@root" : ".",
+    "@src": "./src/",
+    "@commands" : "./src/commands"
+  }
+}
