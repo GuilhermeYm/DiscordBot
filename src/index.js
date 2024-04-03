@@ -20,15 +20,17 @@ const client = new Client({
   ],
 });
 
-client.commands = new Collection()
+client.commands = new Collection();
 
 for (const file of commandFile) {
   const filePath = path.join(commandsPath, file);
-  const command = require(filePath)
-  if ("data" in command && "execute" in command){ 
-    client.commands.set(command.data.name, command)
+  const command = require(filePath);
+  if ("data" in command && "execute" in command) {
+    client.commands.set(command.data.name, command);
   } else {
-    console.log(`Esse comando em ${filePath} está com "data" ou "execute" ausente!`)
+    console.log(
+      `Esse comando em ${filePath} está com "data" ou "execute" ausente!`
+    );
   }
 }
 
@@ -38,35 +40,22 @@ client.on("ready", (c) => {
   let random = Math.floor(Math.random() * status.length);
   client.user.setActivity(status[random]);
 
-  console.log(client.commands)
+  console.log(client.commands);
 });
 
-client.on(Events.InteractionCreate, async interaction =>{
-  if (interaction.isStringSelectMenu()){
-      const selected = interaction.values[0]
-      if (selected == "javascript"){
-          await interaction.reply("Documentação do Javascript: https://developer.mozilla.org/en-US/docs/Web/JavaScript")
-      } else if (selected == "python"){
-          await interaction.reply("Documentação do Python: https://www.python.org")
-      } else if (selected == "csharp"){
-          await interaction.reply("Documentação do C#: https://learn.microsoft.com/en-us/dotnet/csharp/")
-      } else if (selected == "discordjs"){
-          await interaction.reply("Documentação do Discord.js: https://discordjs.guide/#before-you-begin")
-      }
-  }
-  if (!interaction.isChatInputCommand()) return
-  const command = interaction.client.commands.get(interaction.commandName)
+client.login(process.env.TOKEN);
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+  const command = interaction.client.commands.get(interaction.commandName);
   if (!command) {
-      console.error("Comando não encontrado")
-      return
+    console.error("Comando não encontrado");
+    return;
   }
   try {
-      await command.execute(interaction)
-  } 
-  catch (error) {
-      console.error(error)
-      await interaction.reply("Houve um erro ao executar esse comando!")
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply("Houve um erro ao executar esse comando!");
   }
-})
-
-client.login(process.env.TOKEN);
+});
