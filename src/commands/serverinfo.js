@@ -1,8 +1,9 @@
 const {
   SlashCommandBuilder,
   EmbedBuilder,
-  MessageActionRow,
-  MessageButton,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
 } = require("discord.js");
 
 module.exports = {
@@ -12,6 +13,7 @@ module.exports = {
   async execute(interaction) {
     const guild = interaction.guild;
     await guild.channels.fetch();
+    console.log(guild.memberCount);
 
     const rolesList = guild.roles.cache
       .map((role) => `${role.name}`)
@@ -44,23 +46,42 @@ module.exports = {
         },
         {
           name: "Membros",
-          value: guild.memberCount,
+          value: guild.memberCount.toString(),
           inline: true,
         },
         {
           name: "Cargos",
-          value: guild.roles.cache.size,
+          value: guild.roles.cache.size.toString(),
           inline: true,
         }
-      );
+      )
+      .setImage(guild.iconURL({ size: 256, dynamic: true }))
+      .setTimestamp();
 
-    const viewRolesButton = new MessageButton()
-      .setCustomId("view_roles")
-      .setLabel("Ver cargos")
-      .setStyle("PRIMARY");
+    const button = new ButtonBuilder()
+      .setCustomId("showRolesButton")
+      .setLabel("Mostrar Cargos")
+      .setStyle(ButtonStyle.Primary);
 
-    const row = new MessageActionRow().addComponents(viewRolesButton);
+    const row = new ActionRowBuilder().addComponents(button);
 
     await interaction.reply({ embeds: [serverInfoEmbed], components: [row] });
+    const filter = (i) =>
+      i.customId === "showRolesButton" && i.user.id === interaction.user.id;
+
+    const collector = interaction.channel.createMessageComponentCollector({
+      filter,
+      time: 15000,
+    });
+
+    collector.on("collect", async (i) => {
+      await i.reply(rolesList);
+    });
+
+    collector.on("end", async (collected, reason) => {
+      if (reason === "time") {
+        await interaction.followUp("O tempo para selecionar um botão esgotou.");
+      }
+    });
   },
 };
