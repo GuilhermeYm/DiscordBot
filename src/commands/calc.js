@@ -10,16 +10,16 @@ module.exports = {
         .setDescription("Irei calcular a expressão que você escrever aqui")
         .setRequired(true)
     ),
-  async execute(interection) {
-    const getExpression = interection.options.getNumber("expressão");
+  async execute(interaction) {
+    const getExpression = interaction.options.getString("expressão");
     if (typeof getExpression !== "string") {
-      await interection.reply("Forneça uma expressão aritmética válida!");
+      await interaction.reply("Forneça uma expressão aritmética válida!");
     }
     try {
-        const result = eval(getExpression)
-        await interection.reply(`O resultado é ${result}`)
-    } catch(err){
-        await interection.reply("Ocorreu um erro ao calcurar a expressão")
+      const result = eval(getExpression);
+      await interaction.reply(`O resultado é ${result}`);
+    } catch (err) {
+      await interaction.reply("Ocorreu um erro ao calcurar a expressão");
     }
   },
 };

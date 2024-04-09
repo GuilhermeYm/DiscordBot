@@ -22,17 +22,40 @@ const client = new Client({
 
 client.commands = new Collection();
 
-for (const file of commandFile) {
-  const filePath = path.join(commandsPath, file);
-  const command = require(filePath);
-  if ("data" in command && "execute" in command) {
-    client.commands.set(command.data.name, command);
-  } else {
-    console.log(
-      `Esse comando em ${filePath} está com "data" ou "execute" ausente!`
-    );
-  }
-}
+const loadCommands = (dir) => {
+  const files = fs.readdirSync(dir);
+
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    const stat = fs.lstatSync(filePath);
+
+    if (stat.isDirectory()) {
+      loadCommands(filePath);
+    } else if (file.endsWith(".js")) {
+      const command = require(filePath);
+      try {
+        client.commands.set(command.data.name, command);
+      } catch (err) {
+        console.log(command);
+        console.error(err);
+      }
+    }
+  } 
+};
+
+loadCommands(commandsPath);
+
+// for (const file of commandFile) {
+//   const filePath = path.join(commandsPath, file);
+//   const command = require(filePath);
+//   if ("data" in command && "execute" in command) {
+//     client.commands.set(command.data.name, command);
+//   } else {
+//     console.log(
+//       `Esse comando em ${filePath} está com "data" ou "execute" ausente!`
+//     );
+//   }
+// }
 
 client.on("ready", (c) => {
   console.log(`✅ O bot está pronto. Name: ${c.user.tag}`);

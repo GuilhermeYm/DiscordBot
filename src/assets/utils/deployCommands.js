@@ -3,9 +3,6 @@ const { REST, Routes } = require("discord.js");
 const fs = require("fs");
 const path = require("path");
 const commandsPath = path.join(__dirname, "..", "..", "commands");
-const commandFiles = fs
-  .readdirSync(commandsPath)
-  .filter((file) => file.endsWith(".js"));
 
 const dotEnvPath = path.join(__dirname, "..", "..", "..", ".env");
 
@@ -15,10 +12,22 @@ const { TOKEN, CLIENT_ID } = process.env;
 
 const commands = [];
 
-for (const file of commandFiles) {
-  const command = require(`${commandsPath}/${file}`);
-  commands.push(command.data.toJSON());
-}
+const loadCommands = (dir) => {
+  const files = fs.readFileSync(dir);
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+
+    const stat = fs.lstatSync(filePath);
+
+    if (stat.isDirectory()) {
+      loadCommands(filePath);
+    } else if(file.endsWith(".js")){
+      const command = require(filePath);
+      commands.push(command.data.toJSON());
+    }
+  }
+};
+loadCommands(commandsPath);
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
 
