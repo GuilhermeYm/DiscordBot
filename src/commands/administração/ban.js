@@ -1,9 +1,10 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("ban")
-    .setDescription("Banir alguém do servidor")
+    .setDescription("Esse comando irá banir alguém do servidor")
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .addUserOption((option) =>
       option
         .setName("alvo")
@@ -13,20 +14,17 @@ module.exports = {
     .addStringOption((option) =>
       option.setName("motivo").setDescription("Digite o motivo do banimento")
     ),
-  defaultPermission: false,
-  permissions: [
-    {
-      id: "BAN_MEMBERS",
-      type: "ROLE",
-      permission: true,
-    },
-  ],
   async execute(interaction, client) {
     const targetUser = interaction.options.getUser("alvo");
     const targetMember = interaction.guild.members.cache.get(targetUser.id);
     const reason = interaction.options.getString("motivo") || "Não teve motivo";
 
     await interaction.deferReply();
+
+    if (!interaction.member.permissions.has("BAN_MEMBERS")) { 
+      await interaction.editReply("Você não tem permissão para banir membros.");
+      return;
+    }
 
     if (!targetMember) {
       await interaction.editReply(`Esse usuário não existe.`);

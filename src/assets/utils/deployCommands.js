@@ -13,7 +13,7 @@ const { TOKEN, CLIENT_ID } = process.env;
 const commands = [];
 
 const loadCommands = (dir) => {
-  const files = fs.readFileSync(dir);
+  const files = fs.readdirSync(dir);
   for (const file of files) {
     const filePath = path.join(dir, file);
 
@@ -21,12 +21,19 @@ const loadCommands = (dir) => {
 
     if (stat.isDirectory()) {
       loadCommands(filePath);
-    } else if(file.endsWith(".js")){
+    } else if (file.endsWith(".js")) {
       const command = require(filePath);
-      commands.push(command.data.toJSON());
+      if (command.data) {
+        commands.push(command.data.toJSON());
+      } else {
+        console.error(
+          `O comando em ${filePath} não exporta um objeto com a propriedade 'data'.`
+        );
+      }
     }
   }
 };
+
 loadCommands(commandsPath);
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
