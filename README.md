@@ -1,2 +1,2 @@
 # DiscordBot
-I will create a bot to Discord, but I don't know if I can finish it. 
+Eu irei criar um bot no discord usando Discord.js
